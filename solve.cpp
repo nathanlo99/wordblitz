@@ -53,13 +53,15 @@ void dfs(int cur_sqr, trie_node *cur_node,
 }
 
 int main(int argc, char **argv) {
-  std::ifstream in{"full_dictionary.txt"};
+  std::ifstream in{"dictionary.txt"};
 
   assert(argc > 1 && "No letters specified");
   letters = argv[1];
   assert(letters.size() == 16 && "Wrong number of characters");
   set_letters = std::unordered_set<char>(letters.begin(), letters.end());
 
+  // Read dictionary into a trie, but omit words which contain letters not in
+  // the set of 16, or words which are too long or too short
   while (in >> s) {
     if (s.size() < 2 || s.size() > 16)
       continue;
@@ -74,13 +76,22 @@ int main(int argc, char **argv) {
       dictionary->insert(s);
   }
 
+  // DFS through the tree, bringing along a trie node for dictionary 
+  // _book-keeping_ (haha)
   for (int start = 0; start < 16; ++start)
     dfs(start, dictionary->root->children[letters[start] - 'a']);
 
-  std::sort(words.begin(), words.end(),
+  // We prefer stable_sort mainly for aesthetics: our DFS produces paths
+  // sorted by start node: stable sort makes our algorithm more aesthetic
+  // when it performs
+  // Sort by decreasing length to boost score! (in case our clicker runs out of
+  // time)!
+  std::stable_sort(words.begin(), words.end(),
             [](const std::string &a, const std::string &b) {
               return a.size() > b.size();
             });
+
+  // Output paths to be passed to the clicker.py script, or otherwise processed
   for (const auto &word : words) {
     for (const auto &y : word_paths[word]) {
       std::cout << y << " ";

@@ -13,6 +13,7 @@ def get_position(sqr):
 
 def main():
     pyautogui.PAUSE = 0.02
+    pyautogui.click(get_position(16)) # Grab window focus
     for line in sys.stdin.readlines():
         path = map(int, line.split())
         pyautogui.moveTo(get_position(next(path)))
